@@ -1,8 +1,8 @@
 # Микросервис получения кода страны по IP
 
-Для создания микроосервиса использовался репозиторий [dunglas/symfony-docker](https://github.com/dunglas/symfony-docker)
+Для создания микросервиса использовался репозиторий [dunglas/symfony-docker](https://github.com/dunglas/symfony-docker)
 
-## Запуск микроосервиса
+## Запуск микросервиса
 
 1. Для запуска необходим установленный, [Docker Compose](https://docs.docker.com/compose/install/)
 2. Выполните в консоли `docker-compose build --pull --no-cache`  для построения контейнеров и обновления образов
