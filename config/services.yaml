@@ -4,7 +4,14 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-
+    expires_country_code_time: '%env(int:EXPIRES_COUNTRY_CODE_TIME)%'
+    country_code_external_api_config:
+        url_format: '%env(COUNTRY_CODE_API_URL)%'
+        method: 
+            name: '%env(COUNTRY_CODE_API_METHOD)%'
+            parameters: '%env(COUNTRY_CODE_API_PARAMETERS)%'
+        fail: '%env(COUNTRY_CODE_API_IS_FAILED)%'
+        country_code: '%env(COUNTRY_CODE_API_FIELD)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -22,3 +29,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    
+    
+    App\Service\GetCountryCodeByIpService:
+        arguments:
+            $configs: '%country_code_external_api_config%'

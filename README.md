@@ -1,39 +1,56 @@
-# Symfony Docker
+# Микросервис получения кода страны по IP
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework, with full [HTTP/2](https://symfony.com/doc/current/weblink.html), HTTP/3 and HTTPS support.
+Для создания микроосервиса использовался репозиторий [dunglas/symfony-docker](https://github.com/dunglas/symfony-docker)
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+## Запуск микроосервиса
 
-## Getting Started
+1. Для запуска необходим установленный, [Docker Compose](https://docs.docker.com/compose/install/)
+2. Выполните в консоли `docker-compose build --pull --no-cache`  для построения контейнеров и обновления образов
+3. Выполните в консоли `docker-compose up` (логи будут выводиться в терминале)
+4. Откройте в браузере `https://localhost` (если вы используете переменные окружения из [.env.example](.env.example), то приложение будет развёрнуто на порту 4443)
+5. Для остановки контейнеров `docker-compose down --remove-orphans`.
+6. Удобные предустановленные команды можно посмотреть в [Makefile](Makefile) при условии если у вас установлен [make](https://www.gnu.org/software/make/)
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/)
-2. Run `docker-compose build --pull --no-cache` to build fresh images
-3. Run `docker-compose up` (the logs will be displayed in the current shell)
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker-compose down --remove-orphans` to stop the Docker containers.
+## Работа микроосервиса
 
-## Features
+* Микросервис получает запросы по маршруту: `/v1/get_country_code`
+* Запрашиваемый Ip адрес должен быть указан в качестве query запроса: `/v1/get_country_code?ip=8.8.8.8`
+* Ответ на запрос отправляется а виде json с ключем `country_code`
+```
+{
+    "country_code": "RU"
+}
+```
 
-* Production, development and CI ready
-* Automatic HTTPS (in dev and in prod!)
-* HTTP/2, HTTP/3 and [Preload](https://symfony.com/doc/current/web_link.html) support
-* Built-in [Mercure](https://symfony.com/doc/current/mercure.html) hub
-* [Vulcain](https://vulcain.rocks) support
-* Just 2 services (PHP FPM and Caddy server)
-* Super-readable configuration
+* В настройках можно изменить api - поставщика данных для микросервиса а также время кеширования в .env:
 
-**Enjoy!**
+```
+#Время кеширования запроса
+EXPIRES_COUNTRY_CODE_TIME=3600
 
-## Docs
+#Базовый формат url с указанием {ip}
+COUNTRY_CODE_API_URL=https://ipapi.co/{ip}/json/
 
-1. [Build options](docs/build.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Installing Xdebug](docs/xdebug.md)
-6. [Using a Makefile](docs/makefile.md)
-7. [Troubleshooting](docs/troubleshooting.md)
+#Метод запроса к внешнему API
+COUNTRY_CODE_API_METHOD=GET
 
-## Credits
+#Параметры запроса к внешнему API (query для GET, body для POST)
+COUNTRY_CODE_API_PARAMETERS=""
 
-Created by [Kévin Dunglas](https://dunglas.fr), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+#Ключ и значение тела ответа при ошибке либо неудачном запросе
+COUNTRY_CODE_API_IS_FAILED=error:true
+
+#Ключ тела ответа для получения данных о коде страны
+COUNTRY_CODE_API_FIELD=country_code
+
+```
+* При ошибках валидации ip а также ошибках запроса у api микросервис возвращает json с ошибками:
+```
+{
+    "errors": "Внешний API не отвечает!"
+}
+
+{
+    "errors": "Object(App\\Entity\\IpAddress).ip:\n    Не верный формат Ip адреса! (code b1b427ae-9f6f-41b0-aa9b-84511fbb3c5b)\n"
+}
+```
